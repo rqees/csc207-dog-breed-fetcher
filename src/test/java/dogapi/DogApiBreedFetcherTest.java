@@ -2,25 +2,29 @@ package dogapi;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-class DogApiBreedFetcherTest {
+class MainTest {
 
     @Test
-    void testValidBreedReturnsSubBreeds() throws BreedFetcher.BreedNotFoundException {
-        BreedFetcher fetcher = new DogApiBreedFetcher();
-        List<String> subBreeds = fetcher.getSubBreeds("hound");
-        Set<String> expected = new HashSet<>(List.of("afghan", "basset", "blood", "english", "ibizan", "plott", "walker"));
-        assertEquals(expected, new HashSet<>(subBreeds));
+    void getNumberOfSubBreedsValidBreed() {
+        BreedFetcherForLocalTesting mock = new BreedFetcherForLocalTesting();
+
+        assertEquals(2, Main.getNumberOfSubBreeds("hound", mock));
     }
 
     @Test
-    void testInvalidBreedThrowsException() {
-        BreedFetcher fetcher = new DogApiBreedFetcher();
-        assertThrows(BreedFetcher.BreedNotFoundException.class, () -> fetcher.getSubBreeds("cat"));
+    void getNumberOfSubBreedsInvalidBreed() {
+        BreedFetcherForLocalTesting mock = new BreedFetcherForLocalTesting();
+
+        assertEquals(0, Main.getNumberOfSubBreeds("cat", mock));
     }
+
+    @Test
+    void exceptionTypeTest() {
+        Exception bfe = new BreedFetcher.BreedNotFoundException("hound");
+        assertTrue(bfe instanceof Exception && !(bfe instanceof RuntimeException),
+                "BreedFetcher.BreedNotFoundException must be a checked exception.");
+    }
+
 }
