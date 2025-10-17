@@ -4,6 +4,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -26,46 +27,38 @@ public class DogApiBreedFetcher implements BreedFetcher {
      */
     @Override
     public List<String> getSubBreeds(String breed) throws BreedNotFoundException {
-        if (breed == null || breed.isBlank()) {
+        if (breed == null || breed.trim().isEmpty()) {
             throw new BreedNotFoundException(breed);
         }
 
-        String apiUrl = "https://dog.ceo/api/breed/" + breed.toLowerCase() + "/list";
-        Request apiRequest = new Request.Builder().url(apiUrl).get().build();
+        String url = "https://dog.ceo/api/breed/" + breed.trim().toLowerCase(java.util.Locale.ROOT) + "/list";
+        okhttp3.Request request = new okhttp3.Request.Builder()
+                .url(url)
+                .header("Accept", "application/json")
+                .header("User-Agent", "csc207")
+                .build();
 
-        Response apiResponse = null;
-        try {
-            apiResponse = client.newCall(apiRequest).execute();
-
-            if (apiResponse.body() == null) {
+        try (okhttp3.Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful() || response.body() == null) {
                 throw new BreedNotFoundException(breed);
             }
 
-            String responseText = apiResponse.body().string();
-            JSONObject jsonResponse = new JSONObject(responseText);
+            String jsonText = response.body().string();
+            org.json.JSONObject root = new org.json.JSONObject(jsonText);
 
-            String status = jsonResponse.optString("status");
-            if (!apiResponse.isSuccessful() || !"success".equalsIgnoreCase(status)) {
+            if (!"success".equalsIgnoreCase(root.optString("status", ""))) {
                 throw new BreedNotFoundException(breed);
             }
 
-            JSONArray message = jsonResponse.optJSONArray("message");
-            List<String> subBreeds = new ArrayList<>();
-
-            if (message != null) {
-                for (int i = 0; i < message.length(); i++) {
-                    subBreeds.add(message.getString(i));
-                }
+            org.json.JSONArray arr = root.getJSONArray("message");
+            java.util.List<String> result = new java.util.ArrayList<>();
+            for (int i = 0; i < arr.length(); i++) {
+                result.add(arr.getString(i));
             }
+            return result;
 
-            return subBreeds;
-
-        } catch (IOException e) {
+        } catch (java.io.IOException | org.json.JSONException e) {
             throw new BreedNotFoundException(breed);
-        } finally {
-            if (apiResponse != null) {
-                apiResponse.close();
-            }
         }
     }
 }

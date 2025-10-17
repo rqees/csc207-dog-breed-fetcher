@@ -24,12 +24,19 @@ public class Main {
      * returned by the fetcher
      */
     public static int getNumberOfSubBreeds(String breed, BreedFetcher breedFetcher) {
+        if (breedFetcher == null) {
+            throw new IllegalArgumentException("breedFetcher must not be null");
+        }
+
+        if (breed == null || breed.trim().isEmpty()) {
+            return 0;
+        }
+
         try {
             List<String> subBreeds = breedFetcher.getSubBreeds(breed);
             return (subBreeds == null) ? 0 : subBreeds.size();
-        } catch (BreedFetcher.BreedNotFoundException ex) {
-            return -1;
+        } catch (BreedFetcher.BreedNotFoundException e) {
+            return 0;
         }
     }
-
-    }
+}
