@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class CachingBreedFetcherTest {
 
     @Test
-    void testCachingAvoidsRedundantCalls() {
+    void testCachingAvoidsRedundantCalls() throws BreedFetcher.BreedNotFoundException {
         BreedFetcherForLocalTesting mock = new BreedFetcherForLocalTesting();
         CachingBreedFetcher cachingFetcher = new CachingBreedFetcher(mock);
 
@@ -40,7 +40,7 @@ class CachingBreedFetcherTest {
 
     // tests that the count of API calls is correctly recorded
     @Test
-    void testCachingAvoidsRedundantCallsCheckCallsMade() {
+    void testCachingAvoidsRedundantCallsCheckCallsMade() throws BreedFetcher.BreedNotFoundException {
         BreedFetcherForLocalTesting mock = new BreedFetcherForLocalTesting();
         CachingBreedFetcher cachingFetcher = new CachingBreedFetcher(mock);
 
@@ -49,7 +49,7 @@ class CachingBreedFetcherTest {
 
         assertEquals(1, cachingFetcher.getCallsMade(),
                 "Fetcher should only be called once due to caching. " +
-                "Make sure that your implementation is recording how many calls have been made!");
+                        "Make sure that your implementation is recording how many calls have been made!");
     }
 
     @Test
@@ -60,7 +60,7 @@ class CachingBreedFetcherTest {
         assertThrows(BreedFetcher.BreedNotFoundException.class, () -> cachingFetcher.getSubBreeds("dragon"));
         assertEquals(1, cachingFetcher.getCallsMade(),
                 "Fetcher should be called even if breed is invalid. " +
-                "Make sure that your implementation is recording how many calls have been made!");
+                        "Make sure that your implementation is recording how many calls have been made!");
     }
 
     @Test
@@ -72,6 +72,6 @@ class CachingBreedFetcherTest {
         assertThrows(BreedFetcher.BreedNotFoundException.class, () -> cachingFetcher.getSubBreeds("dragon"));
         assertEquals(2, cachingFetcher.getCallsMade(),
                 "Fetcher should be called again even if breed is invalid. " +
-                "Make sure that your implementation is recording how many calls have been made!");
+                        "Make sure that your implementation is recording how many calls have been made!");
     }
 }
